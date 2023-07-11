@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
-import pytest
 
+import pytest
 from django.conf import settings
+from django.test import Client
+from django.urls import reverse
 
 from news.models import News, Comment
 
@@ -29,7 +31,8 @@ def comment(commenter, news):
 
 
 @pytest.fixture
-def comment_client(client, commenter):
+def comment_client(commenter):
+    client = Client()
     client.force_login(commenter)
     return client
 
@@ -55,3 +58,13 @@ def all_news():
         settings.NEWS_COUNT_ON_HOME_PAGE + 5
     )]
     return News.objects.bulk_create(all_news)
+
+
+@pytest.fixture
+def detail_url(news):
+    return reverse('news:detail', args=(news.id,))
+
+
+@pytest.fixture
+def edit_url(comment):
+    return reverse('news:edit', args=(comment.id,))

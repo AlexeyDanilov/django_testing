@@ -1,14 +1,13 @@
-import pytest
 from http import HTTPStatus
 from pytest_django.asserts import assertRedirects, assertFormError
 
+import pytest
 from django.urls import reverse
 
 from news.forms import BAD_WORDS, WARNING
 from news.models import Comment
 
 
-# 1
 @pytest.mark.parametrize(
     'user_client, count',
     (
@@ -23,7 +22,6 @@ def test_create_comment(user_client, count, news, form_data):
     assert news.comment_set.count() == count
 
 
-# 2
 def test_stop_words(comment_client, news, form_data):
     url = reverse('news:detail', args=(news.id,))
     form_data['text'] += BAD_WORDS[0]
@@ -55,9 +53,10 @@ def test_user_cant_edit_comment_of_another_user(
 ):
     url = reverse('news:edit', args=(comment.id,))
     response = admin_client.post(url, data=form_data)
+    old_text = comment.text
     comment.refresh_from_db()
     assert response.status_code == HTTPStatus.NOT_FOUND
-    assert comment.text == 'comment'
+    assert comment.text == old_text
 
 
 @pytest.mark.parametrize(

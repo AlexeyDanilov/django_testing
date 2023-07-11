@@ -1,28 +1,17 @@
 from http import HTTPStatus
-import pytest
 from pytest_django.asserts import assertRedirects
 
+import pytest
 from django.urls import reverse
 
 
+action_urls = 'url', (('news:edit'), ('news:delete'))
+
+
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    'user_client',
-    (
-        (pytest.lazy_fixture('client')),
-        (pytest.lazy_fixture('admin_client'))
-    ),
-)
-def test_home_page(user_client):
+def test_home_page(admin_client):
     url = reverse('news:home')
-    response = user_client.get(url)
-    assert response.status_code == HTTPStatus.OK
-
-
-@pytest.mark.django_db
-def test_detail_page_for_anonim(client, news):
-    url = reverse('news:detail', args=(news.id,))
-    response = client.get(url)
+    response = admin_client.get(url)
     assert response.status_code == HTTPStatus.OK
 
 
@@ -33,30 +22,33 @@ def test_detail_page_for_anonim(client, news):
         (pytest.lazy_fixture('comment_client'), HTTPStatus.OK),
     )
 )
-@pytest.mark.parametrize('url', (('news:edit'), ('news:delete')))
+@pytest.mark.parametrize(*action_urls)
 def test_get_action_comment(user_client, result, url, comment):
     url = reverse(url, args=(comment.id,))
     response = user_client.get(url)
     assert response.status_code == result
 
 
-@pytest.mark.parametrize('page', (('news:edit'), ('news:delete')))
-def test_action_pages_by_anonim(client, page, comment):
-    url = reverse(page, args=(comment.id,))
+@pytest.mark.parametrize(*action_urls)
+def test_action_pages_by_anonim(client, url, comment):
+    url = reverse(url, args=(comment.id,))
     response = client.get(url)
     redirect_url = reverse('users:login') + f'?next={url}'
     assertRedirects(response, redirect_url)
 
 
+@pytest.mark.django_db
 @pytest.mark.parametrize(
-    'page',
+    'url',
     (
-        ('users:login'),
-        ('users:logout'),
-        ('users:signup')
+        (reverse('users:login')),
+        (reverse('users:logout')),
+        (reverse('users:signup')),
+        (reverse('news:home')),
+        (pytest.lazy_fixture('detail_url'))
     )
 )
-def test_auth_pages_by_anonim(page, client):
-    url = reverse(page)
+def test_public_pages_by_anonim(url, client):
+    print(url)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
