@@ -8,6 +8,7 @@ from notes.models import Note
 User = get_user_model()
 url_list = reverse('notes:list')
 
+
 class TestContent(TestCase):
 
     @classmethod
@@ -26,7 +27,6 @@ class TestContent(TestCase):
         cls.another_client = Client()
         cls.author_client.force_login(cls.author)
         cls.another_client.force_login(cls.another_author)
-
 
     def test_notes_on_page_by_author(self):
         response = self.author_client.get(url_list)
