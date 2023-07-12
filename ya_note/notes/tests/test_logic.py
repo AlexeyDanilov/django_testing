@@ -56,8 +56,8 @@ class TestLogic(TestCase):
     def test_repeat_slug(self):
         self.FORM_DATA['slug'] = 'slug'
         self.author_client.post(self.create_url, data=self.FORM_DATA)
-        expected_count = Note.objects.count()
-        self.assertEqual(expected_count, self.note_count)
+        current_count = Note.objects.count()
+        self.assertEqual(current_count, self.note_count)
 
     def test_update_note_by_author(self):
         self.author_client.post(self.update_url, data=self.FORM_DATA)
@@ -71,8 +71,7 @@ class TestLogic(TestCase):
             self.update_url,
             data=self.FORM_DATA
         )
-        self.note.refresh_from_db()
-        updated_note = Note.objects.first()
+        updated_note = Note.objects.get(id=self.note.pk)
         self.assertEqual(self.note.title, updated_note.title)
         self.assertEqual(self.note.text, updated_note.text)
         self.assertEqual(self.note.slug, updated_note.slug)
@@ -80,13 +79,13 @@ class TestLogic(TestCase):
 
     def test_delete_note_by_author(self):
         self.author_client.delete(self.delete_url)
-        expected_count = Note.objects.count()
-        self.assertEqual(expected_count, self.note_count - 1)
+        current_count = Note.objects.count()
+        self.assertEqual(current_count, self.note_count - 1)
 
     def test_delete_not_by_not_author(self):
         response = self.reader_client.delete(self.delete_url)
-        expected_count = Note.objects.count()
-        self.assertEqual(expected_count, self.note_count)
+        current_count = Note.objects.count()
+        self.assertEqual(current_count, self.note_count)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_auto_slug(self):

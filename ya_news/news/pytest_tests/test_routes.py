@@ -49,6 +49,5 @@ def test_action_pages_by_anonim(client, url, comment):
     )
 )
 def test_public_pages_by_anonim(url, client):
-    print(url)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK

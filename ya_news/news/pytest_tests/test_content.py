@@ -23,7 +23,7 @@ def test_sorting_news(all_news, client):
     response = client.get(url_home)
     news = response.context.get('object_list')
     ids = [item.id for item in news]
-    news_from_db = list(News.objects.values_list('id', flat=True)[:10])
+    news_from_db = list(News.objects.values_list('id', flat=True)[:settings.NEWS_COUNT_ON_HOME_PAGE])
     assert ids == news_from_db
 
 
